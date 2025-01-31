@@ -176,26 +176,6 @@
             color: #555;
             z-index: 1000;
         }
-        
-        .clear-data-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            background: #ff4d4d;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s ease;
-        }
-
-        .clear-data-btn:hover {
-            background: #cc0000;
-        }    
     </style>
 </head>
 <body>
@@ -330,25 +310,17 @@ function closeNotification() {
             } else {
                 roleElement.textContent = "Rolle: Unbekannt";
                 alert("Keine Rolle gefunden! Bitte erneut einloggen.");
-                window.location.href = 'index.html';
+                window.location.href = 'LogIn.html';
             }
 
             displayNotification();
         });
 
-        // Funktion zum Löschen aller Daten aus dem localStorage
-        function clearLocalStorage() {
-            if (confirm('Möchten Sie wirklich alle Daten löschen?')) {
-                localStorage.clear();
-                alert('Alle Daten wurden erfolgreich gelöscht.');
-                window.location.reload();
-            }
-        }
         // Abmelden-Funktion
         function logout() {
             localStorage.removeItem('role'); // Rolle aus dem LocalStorage entfernen
             alert('Sie wurden abgemeldet.');
-            window.location.href = 'index.html'; // Zurück zur Login-Seite
+            window.location.href = 'LogIn.html'; // Zurück zur Login-Seite
         }
     </script>
 </body>
