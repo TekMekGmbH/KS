@@ -91,9 +91,7 @@
     <div class="modal">
         <div class="modal-header">Mitarbeiterübersicht Krankmeldungen</div>
         <div class="modal-body">
-            <ul id="mitarbeiter-krankmeldungen-list">
-                <!-- Krankmeldungen werden hier dynamisch geladen -->
-            </ul>
+            <ul id="mitarbeiter-krankmeldungen-list"></ul>
         </div>
         <div class="modal-footer">
             <button class="cancel" onclick="navigateToDashboard()">Zurück</button>
@@ -108,13 +106,33 @@
         function loadMitarbeiterKrankmeldungen() {
             const krankmeldungen = JSON.parse(localStorage.getItem('krankmeldungen') || '[]');
             const listElem = document.getElementById('mitarbeiter-krankmeldungen-list');
+            const userRole = localStorage.getItem('role');
+            const username = localStorage.getItem('username');
 
             if (krankmeldungen.length === 0) {
                 listElem.innerHTML = '<li>Keine Krankmeldungen vorhanden.</li>';
                 return;
             }
 
-            krankmeldungen.forEach(entry => {
+            const visibleEntries = krankmeldungen.filter(entry => {
+                if (userRole === 'Geschäftsführer') {
+                    return true; // Sieht alles
+                }
+                if (userRole === 'Personalabteilung') {
+                    return entry.user !== 'Geschäftsführer';
+                }
+                if (userRole.startsWith('Teamleiter')) {
+                    return entry.user === username || entry.vorgesetzter === username;
+                }
+                return false;
+            });
+
+            if (visibleEntries.length === 0) {
+                listElem.innerHTML = '<li>Keine Krankmeldungen für Sie sichtbar.</li>';
+                return;
+            }
+
+            visibleEntries.forEach(entry => {
                 const listItem = document.createElement('li');
                 listItem.innerHTML = `
                     <strong>Mitarbeiter:</strong> ${entry.user}<br>
