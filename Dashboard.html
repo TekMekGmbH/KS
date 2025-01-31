@@ -310,7 +310,7 @@ function closeNotification() {
             } else {
                 roleElement.textContent = "Rolle: Unbekannt";
                 alert("Keine Rolle gefunden! Bitte erneut einloggen.");
-                window.location.href = 'LogIn.html';
+                window.location.href = 'index.html';
             }
 
             displayNotification();
@@ -320,7 +320,7 @@ function closeNotification() {
         function logout() {
             localStorage.removeItem('role'); // Rolle aus dem LocalStorage entfernen
             alert('Sie wurden abgemeldet.');
-            window.location.href = 'LogIn.html'; // Zurück zur Login-Seite
+            window.location.href = 'index.html'; // Zurück zur Login-Seite
         }
     </script>
 </body>
