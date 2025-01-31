@@ -32,6 +32,7 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -64,16 +65,16 @@
             position: relative;
         }
 
-        .modal-body li button.delete {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            font-size: 1.2em;
-            color: red;
-            cursor: pointer;
-        }
+            .modal-body li button.delete {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: none;
+                border: none;
+                font-size: 1.2em;
+                color: red;
+                cursor: pointer;
+            }
 
         .modal-footer {
             text-align: right;
@@ -93,9 +94,9 @@
             color: #333;
         }
 
-        .cancel:hover {
-            background: #bbb;
-        }
+            .cancel:hover {
+                background: #bbb;
+            }
     </style>
 </head>
 <body>
@@ -140,11 +141,13 @@
 
                 const listItem = document.createElement('li');
                 listItem.innerHTML = `
-                    <strong>Zeitraum:</strong> ${entry.startDate} bis ${entry.endDate}<br>
-                    <strong>Status:</strong> ${entry.status}<br>
-                    ${entry.kommentar ? `<strong>Kommentar:</strong> ${entry.kommentar}` : ''}
-                    ${isHealthy ? `<button class="delete" onclick="deleteKrankmeldung(${index})">&times;</button>` : ''}
-                `;
+                            <strong>Zeitraum:</strong> ${entry.startDate} bis ${entry.endDate}<br>
+                            <strong>Status:</strong> ${entry.status}<br>
+                            ${entry.kommentar ? `<strong>Kommentar:</strong> ${entry.kommentar}<br>` : ''}
+                            ${entry.gesundMeldungDatum ? `<strong>Gesundmeldung Datum:</strong> ${entry.gesundMeldungDatum}<br>` : ''}
+                            ${entry.gesundMeldungUhrzeit ? `<strong>Gesundmeldung Uhrzeit:</strong> ${entry.gesundMeldungUhrzeit}<br>` : ''}
+                        ${isHealthy ? `<button class="delete" onclick="deleteKrankmeldung(${index})">&times;</button>` : ''}
+                    `;
                 listElem.appendChild(listItem);
             });
         }
