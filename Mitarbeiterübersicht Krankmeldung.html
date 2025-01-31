@@ -17,12 +17,14 @@
         }
 
         .modal {
-            width: 400px;
+            width: 500px;
             background: white;
             border-radius: 8px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
+            padding: 20px;
             animation: fadeIn 0.3s ease-out;
+            max-height: 80%;
+            overflow-y: auto;
         }
 
         @keyframes fadeIn {
@@ -39,17 +41,13 @@
         .modal-header {
             background: #00B7FF;
             color: white;
-            padding: 10px;
+            padding: 15px;
             text-align: center;
-            font-size: 1.2em; /* Schriftgröße angepasst */
-            font-weight: normal; /* Schriftstärke angepasst */
-            font-family: Arial, sans-serif; /* Einheitliche Schriftart */
-        }
-
-        .modal-body {
-            padding: 20px;
-            max-height: 300px;
-            overflow-y: auto;
+            font-size: 1.2em;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+            margin: -20px -20px 20px -20px;
         }
 
         .modal-body ul {
@@ -63,29 +61,28 @@
             border-radius: 4px;
             margin-bottom: 10px;
             background: #f9f9f9;
+            position: relative;
         }
 
         .modal-footer {
-            padding: 10px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
+            text-align: right;
         }
 
-        .modal-footer button {
+        button {
             padding: 10px 15px;
             border: none;
             border-radius: 4px;
             font-size: 1em;
             cursor: pointer;
+            transition: background 0.3s;
         }
 
-        .modal-footer .cancel {
+        .cancel {
             background: #ccc;
             color: #333;
         }
 
-        .modal-footer .cancel:hover {
+        .cancel:hover {
             background: #bbb;
         }
     </style>
@@ -94,9 +91,7 @@
     <div class="modal">
         <div class="modal-header">Mitarbeiterübersicht Krankmeldungen</div>
         <div class="modal-body">
-            <ul id="krankmeldungen-list">
-                <!-- Krankmeldungen werden hier dynamisch geladen -->
-            </ul>
+            <ul id="mitarbeiter-krankmeldungen-list"></ul>
         </div>
         <div class="modal-footer">
             <button class="cancel" onclick="navigateToDashboard()">Zurück</button>
@@ -108,57 +103,48 @@
             window.location.href = 'Dashboard.html';
         }
 
-        function loadKrankmeldungen() {
-            const role = localStorage.getItem('role');
-            const username = localStorage.getItem('username'); // Benutzername für spezifische Filter
+        function loadMitarbeiterKrankmeldungen() {
             const krankmeldungen = JSON.parse(localStorage.getItem('krankmeldungen') || '[]');
-            const listElem = document.getElementById('krankmeldungen-list');
+            const listElem = document.getElementById('mitarbeiter-krankmeldungen-list');
+            const userRole = localStorage.getItem('role');
+            const username = localStorage.getItem('username');
 
-            let visibleKrankmeldungen = [];
-
-            // Logik für Zugriff basierend auf der Rolle
-            if (role === 'Geschäftsführer') {
-                visibleKrankmeldungen = krankmeldungen; // Geschäftsführer kann alle sehen
-            } else if (role === 'Personalabteilung') {
-                visibleKrankmeldungen = krankmeldungen.filter(entry => entry.user !== 'Geschäftsführer');
-            } else if (role === 'Teamleiter (Journalismus)') {
-                visibleKrankmeldungen = krankmeldungen.filter(entry =>
-                    entry.user === username ||
-                    entry.user === 'angestellter_journalismus1' ||
-                    entry.user === 'angestellter_journalismus2'
-                );
-            } else if (role === 'Teamleiter (Marketing)') {
-                visibleKrankmeldungen = krankmeldungen.filter(entry =>
-                    entry.user === username ||
-                    entry.user === 'angestellter_marketing1' ||
-                    entry.user === 'angestellter_marketing2'
-                );
-            } else {
-                alert("Sie haben keine Berechtigung, diese Seite zu sehen.");
-                window.location.href = 'Dashboard.html';
-                return;
-            }
-
-            // Keine Krankmeldungen sichtbar
-            if (visibleKrankmeldungen.length === 0) {
+            if (krankmeldungen.length === 0) {
                 listElem.innerHTML = '<li>Keine Krankmeldungen vorhanden.</li>';
                 return;
             }
 
-            // Krankmeldungen anzeigen
-            visibleKrankmeldungen.forEach(entry => {
+            const visibleEntries = krankmeldungen.filter(entry => {
+                if (userRole === 'Geschäftsführer') {
+                    return true; // Sieht alles
+                }
+                if (userRole === 'Personalabteilung') {
+                    return entry.user !== 'Geschäftsführer';
+                }
+                if (userRole.startsWith('Teamleiter')) {
+                    return entry.user === username || entry.vorgesetzter === username;
+                }
+                return false;
+            });
+
+            if (visibleEntries.length === 0) {
+                listElem.innerHTML = '<li>Keine Krankmeldungen für Sie sichtbar.</li>';
+                return;
+            }
+
+            visibleEntries.forEach(entry => {
                 const listItem = document.createElement('li');
                 listItem.innerHTML = `
                     <strong>Mitarbeiter:</strong> ${entry.user}<br>
                     <strong>Zeitraum:</strong> ${entry.startDate} bis ${entry.endDate}<br>
                     <strong>Status:</strong> ${entry.status}<br>
-                    ${entry.kommentar ? `<strong>Kommentar:</strong> ${entry.kommentar}` : ''}
+                    ${entry.gesundMeldungDatum ? `<strong>Gesundmeldung gesendet am:</strong> ${entry.gesundMeldungDatum} um ${entry.gesundMeldungUhrzeit}` : ''}
                 `;
                 listElem.appendChild(listItem);
             });
         }
 
-        document.addEventListener('DOMContentLoaded', loadKrankmeldungen);
+        document.addEventListener('DOMContentLoaded', loadMitarbeiterKrankmeldungen);
     </script>
 </body>
 </html>
