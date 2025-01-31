@@ -64,6 +64,17 @@
             position: relative;
         }
 
+        .modal-body li button.delete {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            color: red;
+            cursor: pointer;
+        }
+
         .modal-footer {
             text-align: right;
         }
@@ -89,7 +100,7 @@
 </head>
 <body>
     <div class="modal">
-        <div class="modal-header">Aktuelle Krankmeldungen</div>
+        <div class="modal-header">Aktuelle Krankmeldungen verwalten</div>
         <div class="modal-body">
             <ul id="krankmeldungen-list">
                 <!-- Krankmeldungen werden hier dynamisch geladen -->
@@ -106,24 +117,54 @@
         }
 
         function loadKrankmeldungen() {
+            const role = localStorage.getItem('role');
+            if (!role) {
+                alert('Benutzerrolle nicht gefunden! Bitte erneut einloggen.');
+                window.location.href = 'LogIn.html';
+                return;
+            }
+
             const krankmeldungen = JSON.parse(localStorage.getItem('krankmeldungen') || '[]');
             const listElem = document.getElementById('krankmeldungen-list');
 
-            if (krankmeldungen.length === 0) {
+            // Filtere Krankmeldungen für den aktuellen Benutzer und nur sichtbare
+            const userKrankmeldungen = krankmeldungen.filter(entry => entry.user === role && entry.visible !== false);
+
+            if (userKrankmeldungen.length === 0) {
                 listElem.innerHTML = '<li>Keine Krankmeldungen vorhanden.</li>';
                 return;
             }
 
-            krankmeldungen.forEach(entry => {
+            userKrankmeldungen.forEach((entry, index) => {
+                const isHealthy = entry.status.startsWith('gesund gemeldet');
+
                 const listItem = document.createElement('li');
                 listItem.innerHTML = `
-                    <strong>Mitarbeiter:</strong> ${entry.user}<br>
                     <strong>Zeitraum:</strong> ${entry.startDate} bis ${entry.endDate}<br>
                     <strong>Status:</strong> ${entry.status}<br>
-                    ${entry.gesundMeldungDatum ? `<strong>Gesundmeldung gesendet am:</strong> ${entry.gesundMeldungDatum} um ${entry.gesundMeldungUhrzeit}` : ''}
+                    ${entry.kommentar ? `<strong>Kommentar:</strong> ${entry.kommentar}` : ''}
+                    ${isHealthy ? `<button class="delete" onclick="deleteKrankmeldung(${index})">&times;</button>` : ''}
                 `;
                 listElem.appendChild(listItem);
             });
+        }
+
+        function deleteKrankmeldung(index) {
+            const krankmeldungen = JSON.parse(localStorage.getItem('krankmeldungen') || '[]');
+            const role = localStorage.getItem('role');
+
+            // Setze die Eigenschaft `visible` auf false anstatt die Krankmeldung zu löschen
+            const userKrankmeldungen = krankmeldungen.filter(entry => entry.user === role && entry.visible !== false);
+            const globalIndex = krankmeldungen.findIndex(
+                entry => entry.user === role && entry === userKrankmeldungen[index]
+            );
+
+            if (globalIndex > -1) {
+                krankmeldungen[globalIndex].visible = false;
+                localStorage.setItem('krankmeldungen', JSON.stringify(krankmeldungen));
+                alert('Krankmeldung wurde erfolgreich entfernt.');
+                window.location.reload();
+            }
         }
 
         document.addEventListener('DOMContentLoaded', loadKrankmeldungen);
